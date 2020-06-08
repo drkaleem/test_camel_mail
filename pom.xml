@@ -101,27 +101,54 @@
           <includePluginDependencies>false</includePluginDependencies>
         </configuration>
       </plugin>
+<!--      Do Not use maven-assembly-plugin. It caused issues with type converter manifests
+          see issue https://issues.apache.org/jira/browse/CAMEL-15156 -->
+<!--      <plugin>-->
+<!--        <groupId>org.apache.maven.plugins</groupId>-->
+<!--        <artifactId>maven-assembly-plugin</artifactId>-->
+<!--        <executions>-->
+<!--          <execution>-->
+<!--            <phase>package</phase>-->
+<!--            <goals>-->
+<!--              <goal>single</goal>-->
+<!--            </goals>-->
+<!--            <configuration>-->
+<!--              <archive>-->
+<!--                <manifest>-->
+<!--                  <mainClass>-->
+<!--                    org.example.app.MainApp-->
+<!--                  </mainClass>-->
+<!--                </manifest>-->
+<!--              </archive>-->
+<!--              <descriptorRefs>-->
+<!--                <descriptorRef>jar-with-dependencies</descriptorRef>-->
+<!--              </descriptorRefs>-->
+<!--            </configuration>-->
+<!--          </execution>-->
+<!--        </executions>-->
+<!--      </plugin>-->
 
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-assembly-plugin</artifactId>
+        <artifactId>maven-shade-plugin</artifactId>
+        <version>3.2.1</version>
         <executions>
           <execution>
             <phase>package</phase>
             <goals>
-              <goal>single</goal>
+              <goal>shade</goal>
             </goals>
             <configuration>
-              <archive>
-                <manifest>
-                  <mainClass>
-                    org.example.app.MainApp
-                  </mainClass>
-                </manifest>
-              </archive>
-              <descriptorRefs>
-                <descriptorRef>jar-with-dependencies</descriptorRef>
-              </descriptorRefs>
+              <shadedArtifactAttached>true</shadedArtifactAttached>
+              <shadedClassifierName>executable-jar</shadedClassifierName>
+              <transformers>
+                <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                  <mainClass>org.example.app.MainApp</mainClass>
+                </transformer>
+                <transformer implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
+                  <resource>META-INF/services/org/apache/camel/TypeConverterLoader</resource>
+                </transformer>
+              </transformers>
             </configuration>
           </execution>
         </executions>
